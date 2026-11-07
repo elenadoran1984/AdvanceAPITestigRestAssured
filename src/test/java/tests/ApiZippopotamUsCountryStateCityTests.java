@@ -1,25 +1,53 @@
-package examples;
+package tests;
 
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 public class ApiZippopotamUsCountryStateCityTests {
 
-    String baseUrl = "http://zippopotam.us/";
+    private static RequestSpecification requestSpec;
+    private static ResponseSpecification responseSpec;
+
+    @BeforeClass
+    public static void createRequestSpecification(){
+
+        requestSpec = new RequestSpecBuilder().
+                setBaseUri("http://zippopotam.us").
+                build();
+    }
+
+    @BeforeClass
+    public static void createResponseSpecification(){
+
+        responseSpec = new ResponseSpecBuilder().
+                expectStatusCode(200).
+                expectContentType(ContentType.JSON).
+                build();
+    }
 
     /*
     Structure: api.zippopotam.us/country/state/city
-    Example: api.zippopotam.us/us/ma/belmont
      */
     @Test
     public void validateBodyResponseForUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
         when().
-                get(baseUrl + "us/ma/belmont").
+                get("us/ma/belmont").
         then().
                 assertThat().
                 body("country", equalTo("United States")).
@@ -41,8 +69,9 @@ public class ApiZippopotamUsCountryStateCityTests {
     @Test
     public void validateStatusCodeForUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
         when().
-                get(baseUrl + "us/ma/belmont").
+                get("us/ma/belmont").
         then().
                 assertThat().
                 statusCode(200);
@@ -51,8 +80,9 @@ public class ApiZippopotamUsCountryStateCityTests {
     @Test
     public void validateContentTypeForUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
         when().
-                get(baseUrl + "us/ma/belmont").
+                get("us/ma/belmont").
         then().
                 assertThat().
                 contentType(ContentType.JSON);
@@ -61,9 +91,10 @@ public class ApiZippopotamUsCountryStateCityTests {
     @Test
     public void getLogRequestAndResponseForUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
                 log().all().
         when().
-                get(baseUrl + "us/ma/belmont").
+                get("us/ma/belmont").
         then().
                 log().body();
     }
@@ -71,9 +102,12 @@ public class ApiZippopotamUsCountryStateCityTests {
     @Test
     public void validatePlaceNameForUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
         when().
-                get(baseUrl + "us/ma/belmont").
+                get("us/ma/belmont").
         then().
+                spec(responseSpec).
+        and().
                 assertThat().
                 body("'place name'", equalTo("Belmont")).
                 body("places[0].'place name'", equalTo("Belmont")).
@@ -83,8 +117,9 @@ public class ApiZippopotamUsCountryStateCityTests {
     @Test
     public void validateStateForUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
         when().
-                get(baseUrl + "us/ma/belmont").
+                get("us/ma/belmont").
         then().
                 assertThat().
                 body("state", equalTo("Massachusetts"));
@@ -93,8 +128,9 @@ public class ApiZippopotamUsCountryStateCityTests {
     @Test
     public void validateListOfPlaceNamesUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
         when().
-                get(baseUrl + "us/ma/belmont").
+                get("us/ma/belmont").
         then().
                 assertThat().
                 body("places.'place name'", hasItem("Belmont")).
@@ -104,21 +140,47 @@ public class ApiZippopotamUsCountryStateCityTests {
     @Test
     public void validateNumberOfPlaceNamesUSStateMACityBelmont() {
         given().
+                spec(requestSpec).
         when().
-                get(baseUrl + "us/ma/belmont").
+                get( "us/ma/belmont").
         then().
                 assertThat().
                 body("places.'place name'", hasSize(2));
     }
 
+    @Test
+    public void validateAndExtractPlaceNameForUSStateMACityBelmont() {
+
+         Response response =
+         given().
+                 spec(requestSpec).
+         when().
+                get("us/ma/belmont").
+         then().
+                extract().
+                response();
+
+         List<String> placeNames = new ArrayList<>();
+
+         placeNames.add(response.path("'place name'"));
+         placeNames.addAll(response.jsonPath().getList("places.'place name'"));
+
+         Assert.assertEquals(placeNames.size(), 3);
+         Assert.assertEquals(placeNames.get(0), "Belmont");
+         Assert.assertEquals(placeNames.get(1), "Belmont");
+         Assert.assertEquals(placeNames.get(2), "Belmont");
+         Assert.assertTrue(placeNames.contains("Belmont"));
+    }
+
     @Test(dataProvider = "countryCodeStateCodeCityAndPlaceName")
     public void validatePlaceName(String countryCode, String stateCode, String city, String expectedPlaceName) {
         given().
+                spec(requestSpec).
                 pathParam("countryCode", countryCode).
                 pathParam("stateCode", stateCode).
                 pathParam("city", city).
         when().
-                get(baseUrl + "{countryCode}/{stateCode}/{city}").
+                get("{countryCode}/{stateCode}/{city}").
         then().
                 assertThat().
                 body("'place name'", equalTo(expectedPlaceName)).
@@ -134,5 +196,4 @@ public class ApiZippopotamUsCountryStateCityTests {
                 {"us", "ny", "albany", "Albany"}
         };
     }
-
 }
