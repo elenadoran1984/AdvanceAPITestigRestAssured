@@ -17,17 +17,27 @@ public class Constants {
 
     // Test Data - Country
     public static final String COUNTRY_UNITED_STATES = "United States";
-    public static final String COUNTRY_ABBREVIATION_US = "US";
+    public static final String COUNTRY_ABBREVIATION_US = "us";
+    public static final String COUNTRY_ABBREVIATION_CA = "ca";
+    public static final String COUNTRY_ABBREVIATION_NL = "nl";
 
     // Test Data - Location
     public static final String POSTAL_CODE_BEVERLY_HILLS = "90210";
+    public static final String POSTAL_CODE_SCHENECTADY = "12345";
+    public static final String POSTAL_CODE_WAVERLEY = "B2R";
+    public static final String POSTAL_CODE_AMSTERDAM = "1001";
     public static final String PLACE_NAME_BEVERLY_HILLS = "Beverly Hills";
+    public static final String PLACE_NAME_SCHENECTADY = "Schenectady";
+    public static final String PLACE_NAME_WAVERLEY = "Waverley";
+    public static final String PLACE_NAME_AMSTERDAM= "Amsterdam";
     public static final String STATE_CALIFORNIA = "California";
     public static final String STATE_ABBREVIATION_CA = "CA";
 
     // Test Data - Coordinates
     public static final String LATITUDE_BEVERLY_HILLS = "34.0901";
     public static final String LONGITUDE_BEVERLY_HILLS = "-118.4065";
+
+
 
 
 }

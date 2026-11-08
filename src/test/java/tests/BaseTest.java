@@ -20,6 +20,8 @@ public class BaseTest {
                 "Unexpected Content-Type!"
         );
 
+        response.then().log().all();
+
         return response.as(responseClass);
     }
 }

@@ -196,4 +196,5 @@ public class ApiZippopotamUsCountryStateCityTests {
                 {"us", "ny", "albany", "Albany"}
         };
     }
+
 }

@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static utils.Constants.*;
 
@@ -27,7 +26,7 @@ public class LocationTests extends BaseTest{
 
         Assert.assertNotNull(response, "Response should not be null!");
         Assert.assertEquals(response.getCountry(), COUNTRY_UNITED_STATES);
-        Assert.assertEquals(response.getCountryAbbreviation(), COUNTRY_ABBREVIATION_US);
+        Assert.assertEquals(response.getCountryAbbreviation(), COUNTRY_ABBREVIATION_US.toUpperCase());
         Assert.assertEquals(response.getPostCode(), POSTAL_CODE_BEVERLY_HILLS);
 
         Assert.assertNotNull(response.getPlaces());
@@ -55,53 +54,30 @@ public class LocationTests extends BaseTest{
         assertThat(placeNames, hasSize(1));
     }
 
-    String baseUrl = "http://zippopotam.us/";
-
-
-    @Test
-    public void getLogRequestAndResponseForUSZipCode90210() {
-        given().
-                log().all().
-        when().
-                get(baseUrl + "us/90210").
-        then().
-                log().body();
-    }
-
-
-    @Test
-    public void validateAndExtractPlaceNameForUSZipCode90210() {
-
-        String placeName =
-
-        given().
-        when().
-                get(baseUrl + "us/90210").
-        then().
-                extract().
-                path("places[0].'place name'");
-
-        Assert.assertEquals(placeName, "Beverly Hills");
-    }
-
     @Test(dataProvider = "countryCodeZipCodeAndPlaceName")
     public void validatePlaceName(String countryCode, String zipCode, String expectedPlaceName) {
-        given().
-                pathParam("countryCode", countryCode).pathParam("zipCode", zipCode).
-        when().
-                get(baseUrl + "{countryCode}/{zipCode}").
-        then().
-                assertThat().
-                body("places[0].'place name'", equalTo(expectedPlaceName));
+
+        LocationRequest request = new LocationRequest(countryCode, zipCode);
+
+        LocationResponse response = performGetOperation(request.getEndpointPath(), LocationResponse.class);
+
+        Assert.assertNotNull(response, "Response should not be null!");
+        Assert.assertEquals(response.getCountryAbbreviation(), countryCode.toUpperCase());
+        Assert.assertEquals(response.getPostCode(), zipCode);
+
+        Assert.assertNotNull(response.getPlaces(), "Places list should not be null!");
+        Assert.assertFalse(response.getPlaces().isEmpty(), "Places list should not be empty!");
+        Assert.assertEquals(response.getPlaces().get(0).getPlaceName(), expectedPlaceName);
     }
 
     @DataProvider
     public static Object[][] countryCodeZipCodeAndPlaceName(){
         return new Object[][]{
-                {"us", "90210", "Beverly Hills"},
-                {"us", "12345", "Schenectady"},
-                {"ca", "B2R", "Waverley"},
-                {"nl", "1001", "Amsterdam"}
+                {COUNTRY_ABBREVIATION_US, POSTAL_CODE_BEVERLY_HILLS, PLACE_NAME_BEVERLY_HILLS},
+                {COUNTRY_ABBREVIATION_US, POSTAL_CODE_SCHENECTADY, PLACE_NAME_SCHENECTADY},
+                {COUNTRY_ABBREVIATION_CA, POSTAL_CODE_WAVERLEY, PLACE_NAME_WAVERLEY},
+                {COUNTRY_ABBREVIATION_NL, POSTAL_CODE_AMSTERDAM, PLACE_NAME_AMSTERDAM}
         };
     }
+
 }
